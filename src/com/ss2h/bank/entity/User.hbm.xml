@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.ss2h.bank.entity">
+
+	<class name="User" table="user_table" catalog="bank">
+
+		<id name="id" type="int" column="id">
+			<generator class="native" />
+		</id>
+
+		<property name="username" type="string">
+			<column name="username" not-null="true" length="20" />
+		</property>
+
+		<property name="password" type="string">
+			<column name="password" not-null="true" length="20" />
+		</property>
+
+		<property name="realname" type="string">
+			<column name="realname" not-null="true" length="20" />
+		</property>
+
+		<property name="pid" type="string">
+			<column name="pid" not-null="true" length="10" />
+		</property>
+
+		<property name="phone" type="string">
+			<column name="phone" not-null="true" length="20" />
+		</property>
+
+		<list name="accounts" lazy="false" fetch="join"
+		    	cascade="all delete-orphan">
+			<key column="fk_user_id" not-null="true" />
+			<list-index column="position" />
+			<one-to-many class="Account" />
+		</list>
+
+	</class>
+</hibernate-mapping>

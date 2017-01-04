@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.ss2h.bank.entity">
+
+	<class name="TransactionLog" table="transactionLog_table"
+		catalog="bank">
+
+		<id name="id" type="int" column="id">
+			<generator class="native" />
+		</id>
+
+		<property name="txDate" type="java.util.Date">
+			<column name="txDate" not-null="true" />
+		</property>
+
+		<property name="txAmount" type="double">
+			<column name="txAmount" not-null="true" />
+		</property>
+
+		<many-to-one name="fromAccount" class="Account" column="fk_fromAccount_id"
+			not-null="true" lazy="false" cascade="all" />
+		
+		<many-to-one name="toAccount" class="Account" column="fk_toAccount_id"
+			not-null="false" lazy="false" cascade="all" />
+
+		<many-to-one name="txType" class="TransactionType" column="fk_txType_id"
+			not-null="true" lazy="false" cascade="all" />
+
+	</class>
+</hibernate-mapping>

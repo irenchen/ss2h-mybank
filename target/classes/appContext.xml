@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:dwr="http://www.directwebremoting.org/schema/spring-dwr"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.directwebremoting.org/schema/spring-dwr 
+		http://www.directwebremoting.org/schema/spring-dwr-3.0.xsd
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+
+    
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/bank" />
+		<property name="username" value="hbbank" />
+		<property name="password" value="hbbank" />
+	</bean>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:hibernate.cfg.xml" />
+	</bean>
+
+	<tx:annotation-driven />
+
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<context:annotation-config />
+
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:pointcut expression="execution(* com.ss2h.bank.biz.*.*(..))"
+			id="txPointcut" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut" />
+	</aop:config>
+
+	<bean id="userDAO" class="com.ss2h.bank.dao.UserDAOImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="adminDAO" class="com.ss2h.bank.dao.AdminDAOImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="accountStatusDAO" class="com.ss2h.bank.dao.AccountStatusDAOImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="txTypeDAO" class="com.ss2h.bank.dao.TxTypeDAOImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="txDAO" class="com.ss2h.bank.dao.TxDAOImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="userBiz" class="com.ss2h.bank.biz.UserBizImpl">
+		<property name="userDAO" ref="userDAO" />
+	</bean>
+	
+	<bean id="adminBiz" class="com.ss2h.bank.biz.AdminBizImpl">
+		<property name="adminDAO" ref="adminDAO" />
+	</bean>
+	
+	<bean id="txBiz" class="com.ss2h.bank.biz.TxBizImpl">
+		<property name="txDAO" ref="txDAO" />
+		<property name="txTypeDAO" ref="txTypeDAO" />
+	</bean>
+	
+	<bean id="accountStatusBiz" class="com.ss2h.bank.biz.AccountStatusBizImpl">
+		<property name="accountStatusDAO" ref="accountStatusDAO" />
+	</bean>
+	
+	<bean id="userAction" class="com.ss2h.bank.action.UserAction"
+		scope="prototype">
+		<property name="userBiz" ref="userBiz" />
+		<property name="txBiz" ref="txBiz" />
+	</bean>
+	
+	<bean id="adminAction" class="com.ss2h.bank.action.AdminAction"
+		scope="prototype">
+		<property name="adminBiz" ref="adminBiz" />
+		<property name="userBiz" ref="userBiz" />
+		<property name="accountStatusBiz" ref="accountStatusBiz" />
+	</bean>
+
+	<dwr:configuration>
+	    <dwr:convert type="bean" class="com.ss2h.bank.bean.UserData" />
+		<dwr:convert type="bean" class="com.ss2h.bank.entity.User" />
+		<dwr:convert type="bean" class="com.ss2h.bank.entity.Account" />
+		<dwr:convert type="bean" class="com.ss2h.bank.entity.AccountStatus" />
+		<dwr:convert type="bean" class="com.ss2h.bank.entity.TransactionLog" />
+	</dwr:configuration>
+  
+	<bean id="adminDWR" class="com.ss2h.bank.dwr.AdminDWR">
+    	<dwr:remote javascript="AdminDWR">
+      		<dwr:include method="listAllUsers" />
+      		<dwr:include method="updateUser" />
+    	</dwr:remote>
+    	<property name="adminBiz" ref="adminBiz" />
+    	<property name="userBiz" ref="userBiz" />
+    	<property name="accountStatusBiz" ref="accountStatusBiz" />
+	</bean>
+	
+</beans>

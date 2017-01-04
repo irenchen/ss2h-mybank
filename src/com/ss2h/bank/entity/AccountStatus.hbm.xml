@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.ss2h.bank.entity">
+
+	<class name="AccountStatus" table="accountStatus_table" catalog="bank">
+
+		<id name="id" type="int" column="id">
+			<generator class="native" />
+		</id>
+
+		<property name="statusName" type="string">
+			<column name="statusName" not-null="true" />
+		</property>
+		
+	</class>
+
+</hibernate-mapping>
